@@ -1,0 +1,1 @@
+{"title":"My gcm title","body":"hi there msg from gcm","icon":"\/gcm\/images\/push-icon.png","url":"\/info.php"}
