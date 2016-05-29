@@ -4,16 +4,41 @@
 	//http://localhost/gcm/gcm.php/?push=1
 	//http://localhost/gcm/json-data.php
 	
-	
-	//Post message to GCM when submitted
-	$pushStatus = "GCM Status Message will appear here";	
-	if(!empty($_GET["push"])) {
-		//$gcmRegID  = file_get_contents("GCMRegId.txt");
+	//Add registration_ids for gcm
+	if(isset($_POST["register"])) {
+		if(isset($_POST["regid"])){
+			$reg_id = $_POST["regid"];
+		}
+		else{
+			die("regid not set");
+		}
+		echo $reg_id;
 		
-		$gcmRegIds = array();
-		$gcmRegIds[] = "fqyZUvL9RNE:APA91bEByKtoaSxw5szTwXaWeOgM71EuNP9siSdCEhiZ0ST8K3pxTFxON6eFvVFSj24j9jMPBSNSvu3Rr6l7EX-aDRsA5ztydSW3v2eKRI1kvh9R2_0apgnHon_LVR6cDSe23YdRhLmf";
-		$gcmRegIds[] = "dz8h7jC3cVA:APA91bEyjhJNQhyUOWBuEsWgXBgzMCC5TgtRHO8y5-SwXin_MpNkcmZf6ChfSWSyZOh5jrwWqMJMyTUe6eDRnwO3NzG4KgIIW1SElqfvwRR6FYfaYll4QuzPSY5zsaSykTS3oJM2DgYQ";
-
+		//use database instead of text file
+		//and add regId to table if not exits
+		$gcmRegIDs_content  = file_get_contents("GcmRegIds.txt");
+		$gcmRegIds = explode("\n", $gcmRegIDs_content);
+		$is_reg_id_exists = false;
+		foreach($gcmRegIds as $regId){
+			if($regId == $reg_id){
+				$is_reg_id_exists = true;
+				break;
+			}
+		}
+		
+		if($is_reg_id_exists===false)
+			file_put_contents("GcmRegIds.txt", "\n".$reg_id, FILE_APPEND | LOCK_EX);
+	}
+	
+	//Post message to GCM when submitted	
+	if(isset($_GET["push"])) {
+		//db will be used to contains registatoin_ids so pick data from table
+		//I have implemented it using text file
+		$gcmRegIDs_content  = file_get_contents("GcmRegIds.txt");
+		$gcmRegIds = explode("\n", $gcmRegIDs_content);
+		echo"<pre>";
+		print_r($gcmRegIds);
+		echo "</pre>";
 		$message = array(
 							"title"=>"My gcm title",
 							"body"=>"hi there msg from gcm",
@@ -60,8 +85,10 @@
         curl_close($ch);
         return $result;
     }
-	
-	//http://deanhume.com/home/blogpost/push-notifications-on-the-web---google-chrome/10128
+
+//see these urls for info	
+//http://deanhume.com/home/blogpost/push-notifications-on-the-web---google-chrome/10128
 //http://www.androidhive.info/2012/10/android-push-notifications-using-google-cloud-messaging-gcm-php-and-mysql/
 //https://developers.google.com/web/updates/2015/03/push-notifications-on-the-open-web?hl=en
+//https://www.design19.org/blog/chrome-push-notifications/
 ?>
