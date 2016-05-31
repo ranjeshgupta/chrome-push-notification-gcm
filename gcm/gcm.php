@@ -46,7 +46,7 @@
 							"url"=>"/info.php"
 						);
 		put_latest_gcm_json($message);
-		$pushStatus = sendMessageThroughGCM($gcmRegIds, $message);
+		$pushStatus = sendMessageThroughGCM($gcmRegIds, $message, 'my_collapsed_key');
 		echo $pushStatus ."<br>";
 	}
 	
@@ -56,11 +56,12 @@
 	}
 	
 	//Generic php function to send GCM push notification
-   function sendMessageThroughGCM($registatoin_ids, $message) {
+   function sendMessageThroughGCM($registatoin_ids, $message, $collapse_key) {
 		//Google cloud messaging GCM-API url
         $url = 'https://android.googleapis.com/gcm/send';
         $fields = array(
             'registration_ids' => $registatoin_ids,
+            'collapse_key' => $collapse_key, //collapsed key so only one msg will arrive when user get online as he/whe was offline at delivery time and got multiple msg
             'data' => $message,
         );
 		
