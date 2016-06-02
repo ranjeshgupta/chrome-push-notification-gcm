@@ -19,7 +19,7 @@
 
 'use strict';
 
-//if(!getCookie("notification_cookie")) {
+if(!getCookie("notification_cookie")) {
 	if ('serviceWorker' in navigator) {
 	  console.log('Service Worker is supported');
 	  navigator.serviceWorker.register('serviceworker.js').then(function() {
@@ -27,21 +27,20 @@
 	  }).then(function(reg) {
 		console.log('Service Worker is ready :^)', reg);
 		reg.pushManager.subscribe({userVisibleOnly: true}).then(function(sub) {
-		  console.log('endpoint:', sub.endpoint);
-		  console.log(sub);
+		  //console.log('endpoint:', sub.endpoint);
+		  //console.log(sub);
 		  var subscriptionId = getGcmRegistrationId(sub);
-		  //console.log(subscriptionId);
+		  console.log(subscriptionId);
 		  
 		  $.ajax({
 				 type: "POST",
 				 url: "gcm.php",
 				 data: { 
 						register: "1",
-						regid: subscriptionId[0],
-						browser: subscriptionId[1]
+						regid: subscriptionId
 					 },
 			  success: function(data){
-				//console.log(data);
+				console.log(data);
 				//Set cookie to accept and expire date to 1 year
 				//setCookie(category_cookie, 1, 365);
 				var d = new Date();
@@ -55,36 +54,19 @@
 		console.log('Service Worker error :^(', error);
 	  });
 	}
-	else{
-		console.log('Service Worker is not supported');
-	}
-//}
+}
 
 function getGcmRegistrationId(sub) {
-	var output = new Array(2);
   if (sub.subscriptionId) {
-    output[0] = sub.subscriptionId;
-	output[1] = "chrome"
-	return output;
+    return sub.subscriptionId;
   }
 
   var endpoint = 'https://android.googleapis.com/gcm/send/';
   var parts = sub.endpoint.split(endpoint);
+
   if(parts.length > 1)
   {
-    output[0] = parts[1];
-	output[1] = "chrome"
-	return output;
-  }
-  else{
-	  var endpoint = 'https://updates.push.services.mozilla.com/push/v1/';
-	  var parts = sub.endpoint.split(endpoint);
-	  if(parts.length > 1)
-	  {
-		output[0] = parts[1];
-		output[1] = "firefox"
-		return output;
-	  }
+    return parts[1];
   }
 } 
 
