@@ -44,8 +44,8 @@
 		$gcmRegIDs_content  = file_get_contents("GcmRegIds.txt");
 		$gcmRegIds = explode("\n", $gcmRegIDs_content);
 		echo"<pre>";
+		echo "<h1>registration ids to push notification:</h1>";
 		print_r($gcmRegIds);
-		//echo "</pre>";
 		
 		$message = array(
 							"title"=>"My gcm title",
@@ -54,8 +54,9 @@
 							"url"=>"/info.php"
 						);
 		put_latest_gcm_json($message);
-		$pushStatus = send_push_message($gcmRegIds, $message);
-		echo $pushStatus ."<br>";
+		send_push_message($gcmRegIds, $message);
+		echo "<br>All done<br>";
+		echo "</pre>";
 	}
 	
 	function send_push_message($subscriptionIDs, $message){
@@ -63,6 +64,7 @@
 		$chs = $sChrome = array();
 		$mh = curl_multi_init();
 		$aCurlHandles = array();
+		echo "<h1>registration ids to which pushing notification</h1>";
 		foreach ($subscriptionIDs as $subscription){
 			$subscription = json_decode($subscription);
 			print_r($subscription);
@@ -70,7 +72,7 @@
 			$i = count($chs);
 			switch ($subscription[1]){
 				case "firefox":
-					echo "firefox<br>";
+					//echo "firefox<br>";
 					$chs[ $i ] = curl_init();
 					curl_setopt($chs[ $i ], CURLOPT_URL, "https://updates.push.services.mozilla.com/push/v1/".$subscription[0] );
 					curl_setopt($chs[ $i ], CURLOPT_PUT, TRUE);
@@ -82,7 +84,7 @@
 					curl_multi_add_handle($mh, $chs[ $i ]);
 				break;
 				case "chrome":
-					echo "chrome<br>";
+					//echo "chrome<br>";
 					$sChrome[] = $subscription[0];
 				break;    
 			}
@@ -90,14 +92,18 @@
 		if (!empty($sChrome)){
 			$fields = array(
 				'registration_ids' => $sChrome,
-				'collapse_key' => 'my_collapsed_key',
-				'data' => $message,
+				'collapse_key' => 'unique_push_notification_key',
+				'data' => $message
 			);
 			$i = count($chs);
 			$chs[ $i ] = curl_init();
 			curl_setopt($chs[ $i ], CURLOPT_URL, "https://android.googleapis.com/gcm/send" );
 			curl_setopt($chs[ $i ], CURLOPT_POST, TRUE);
-			curl_setopt($chs[ $i ], CURLOPT_HTTPHEADER, array( "Authorization: key=AIzaSyD1fz_RHNGniz_LSr__o9QMBm3qiMdmxTQ", "Content-Type: application/json" ) );
+			curl_setopt($chs[ $i ], CURLOPT_HTTPHEADER, 
+										array( "Authorization: key=AIzaSyD1fz_RHNGniz_LSr__o9QMBm3qiMdmxTQ", 
+												"Content-Type: application/json" 
+											) 
+						);
 			curl_setopt($chs[ $i ], CURLOPT_RETURNTRANSFER, TRUE);
 			curl_setopt($chs[ $i ], CURLOPT_SSL_VERIFYPEER, FALSE);			
 			curl_setopt($chs[ $i ], CURLOPT_POSTFIELDS, json_encode($fields) );
@@ -113,7 +119,7 @@
 
 		for ($i = 0; $i < count($chs); $i++){
 			$html = curl_multi_getcontent($chs[ $i ]); 
-			echo $html."<br>";
+			echo "<br>Curl no.: $i--". $html."<br>";
 			
 			curl_multi_remove_handle($mh, $chs[ $i ]);
 		} 
@@ -123,7 +129,7 @@
 	
 	function put_latest_gcm_json($message){
 		file_put_contents("GcmJson.txt", json_encode($message));
-		echo "Writing json to text file done.<br>";
+		echo "<h2>Writing json to text file done.</h2>";
 	}
 	
 	/*

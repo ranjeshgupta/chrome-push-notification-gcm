@@ -19,10 +19,10 @@
 
 'use strict';
 
-//if(!getCookie("notification_cookie")) {
+//if(!getCookie("notification_cookie")) { 
 	if ('serviceWorker' in navigator) {
 	  console.log('Service Worker is supported');
-	  navigator.serviceWorker.register('serviceworker.js').then(function() {
+	  navigator.serviceWorker.register('/serviceworker.js', {scope: '/'}).then(function() {
 		return navigator.serviceWorker.ready;
 	  }).then(function(reg) {
 		console.log('Service Worker is ready :^)', reg);
@@ -42,17 +42,16 @@
 					 },
 			  success: function(data){
 				//console.log(data);
-				//Set cookie to accept and expire date to 1 year
-				//setCookie(category_cookie, 1, 365);
+				//Set cookie to accept and expire date to 7 days
 				var d = new Date();
-				d.setTime(d.getTime() + (365*24*60*60*1000));
+				d.setTime(d.getTime() + (7*24*60*60*1000));
 				var expires = "expires="+d.toUTCString();
 				document.cookie = "notification_cookie=1;" + expires + "; path=/";
 			  }
 		  });
 		});
 	  }).catch(function(error) {
-		console.log('Service Worker error :^(', error);
+		console.error('Service Worker error :^(', error);
 	  });
 	}
 	else{
